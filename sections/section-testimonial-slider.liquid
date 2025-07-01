@@ -1,0 +1,407 @@
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+<style>
+  .testimonial-grid {
+    display: flex;
+    flex-direction: row;
+    gap: 3rem;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .testimonial-info {
+    flex: 1;
+    max-width: 50%;
+  }
+
+  .testimonial-info h2 {
+    font-size: 4rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+
+  .testimonial-info .highlight {
+    color: #3b82f6;
+  }
+
+    .testimonial-nav {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+  }
+
+    .testimonial-subtitle {
+    font-size: 24px;
+    line-height: normal;
+    margin-top: 0;
+    }
+
+    @media screen and (max-width: 749px) {
+    .testimonial-grid {
+    flex-direction: column;
+    }
+
+    .testimonial-info {
+    max-width: unset !important;
+    }
+
+    .testimonial-info h2 {
+    text-align: center;
+    }
+
+    .testimonial-subtitle {
+    text-align: center; 
+    }
+
+    .testimonial-nav {
+    justify-content: center;
+    }
+}
+
+  .testimonial-nav button {
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 2.5rem;
+    height: 30px;
+    width: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: {{ section.settings.background_color_arrows }};
+    color: {{ section.settings.color_arrows }};
+  }
+
+  .testimonial-slider {
+    flex: 1;
+    max-width: 600px;
+    position: relative;
+    height: auto;
+  }
+
+  .testimonial-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .testimonial-slide.active {
+    opacity: 1;
+    pointer-events: auto;
+    position: relative;
+  }
+
+.testimonial-card {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    padding: 2rem;
+    background: #fff;
+    max-width: 700px;
+}
+
+.testimonial-image {
+    width: 120px;
+    height: 150px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.testimonial-content {
+    flex: 1;
+}
+
+.testimonial-content small {
+    color: #6b7280;
+    display: block;
+    margin-bottom: 0.75rem;
+}
+
+.testimonial-card::after {
+    content: "❞";
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 5rem;
+    padding-top: 10px;
+    color: {{ section.settings.icon_color_quote }};
+    background-color: {{ section.settings.background_color_quote }};
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+}
+
+.highlight-word {
+    color: {{ section.settings.highlight_color }};
+}
+
+.testimonial-card--name {
+    font-size: 24px;
+    margin: 0;
+}
+
+.testimonial-card--subtitle {
+    font-size: 14px;
+    margin: 0;
+}
+
+.testimonial-card--text {
+    font-size: 16px;
+    line-height: normal;
+    margin: 0;
+}
+
+
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    let current = 0;
+    const slides = document.querySelectorAll('.testimonial-slide');
+    const slider = document.querySelector('.testimonial-slider');
+
+    function setSliderHeight() {
+      let maxHeight = 0;
+      slides.forEach(slide => {
+        slide.style.position = 'relative'; // Temporär sichtbar machen
+        slide.style.opacity = '1';
+        slide.style.pointerEvents = 'auto';
+        const height = slide.offsetHeight;
+        if (height > maxHeight) maxHeight = height;
+        slide.style.opacity = ''; // Zurücksetzen
+        slide.style.pointerEvents = '';
+        slide.style.position = ''; 
+      });
+      if (slider) {
+        slider.style.height = maxHeight + 'px';
+      }
+    }
+
+    function showSlide(index) {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === index);
+      });
+      current = index;
+    }
+
+    window.slideTestimonial = function(dir) {
+      const next = (current + dir + slides.length) % slides.length;
+      showSlide(next);
+    };
+
+    showSlide(current);
+    setSliderHeight();
+    window.addEventListener('resize', setSliderHeight);
+  });
+</script>
+
+
+<div class="section-{{ section.id }}-padding gradient color-{{ section.settings.section_color_scheme }}">
+    <div class="page-width">
+        <div class="testimonial-section">
+            <div class="testimonial-grid">    
+                <div class="testimonial-info">
+                    {% assign words = section.settings.title | split: ' ' %}
+                    {% assign total_words = words | size %}
+                    {% assign highlight_count = section.settings.highlight_words | default: 1 %}
+                    {% assign normal_count = total_words | minus: highlight_count %}
+
+                    <h2 class="h1">
+                    {% for word in words %}
+                        {% if forloop.index0 < normal_count %}
+                        {{ word }}
+                        {% else %}
+                        <span class="highlight-word">{{ word }}</span>
+                        {% endif %}
+                    {% endfor %}
+                    </h2>
+
+                    <p class="testimonial-subtitle">{{ section.settings.subtitle }}</p>
+                    <div class="testimonial-nav">
+                        <button onclick="slideTestimonial(-1)">‹</button>
+                        <button onclick="slideTestimonial(1)">›</button>
+                    </div>
+                </div>
+
+                <!-- Rechte Seite: Testimonial-Content -->
+                <div class="testimonial-slider">
+                    {% for block in section.blocks %}
+                        <div class="testimonial-slide" id="testimonial-{{ forloop.index }}">
+                        <div class="testimonial-card">
+                            {% if block.settings.image %}
+                                <img
+                                src="{{ block.settings.image | image_url: width: 300 }}"
+                                srcset="{{ block.settings.image | image_url: width: 300 }} 1x, {{ block.settings.image | image_url: width: 600 }} 2x"
+                                alt="{{ block.settings.name | escape }}"
+                                class="testimonial-image"
+                                width="120"
+                                height="150"
+                                loading="lazy">
+                            {% endif %}
+                            <div class="testimonial-content">
+                                <h3 class="testimonial-card--name">{{ block.settings.name }}</h3>
+                                <p class="testimonial-card--subtitle">{{ block.settings.position }}</p>
+                                <p class="testimonial-card--text">{{ block.settings.quote }}</p>
+                            </div>
+                        </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% schema %}
+{
+  "name": "Testimonial Slider",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Titel",
+      "default": "What Professionals Say."
+    },
+    {
+    "type": "range",
+    "id": "highlight_words",
+    "min": 1,
+    "max": 10,
+    "step": 1,
+    "label": "Anzahl hervorgehobener Wörter (am Ende)",
+    "default": 1
+    },
+    {
+    "type": "color",
+    "id": "highlight_color",
+    "label": "Farbe der Hervorhebung",
+    "default": "#3b82f6"
+    },
+    {
+    "type": "color",
+    "id": "background_color_arrows",
+    "label": "Hintergrundfarbe der Pfeile",
+    "default": "#000"
+    },
+    {
+    "type": "color",
+    "id": "color_arrows",
+    "label": "Farbe der Pfeile",
+    "default": "#FFF"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Untertitel",
+      "default": "Real feedback from tradespeople who trust Binford"
+    },
+    {
+      "type": "header",
+      "content": "Allgemeine Einstellungen"
+    },  
+    {
+      "type": "color_scheme",
+      "id": "section_color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
+    },
+    {
+    "type": "color",
+    "id": "background_color_quote",
+    "label": "Farbe Badge Zitat",
+    "default": "#C71B23"
+    },
+    {
+    "type": "color",
+    "id": "icon_color_quote",
+    "label": "Farbe Icon Zitat",
+    "default": "#FFF"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    }
+  ],
+  "blocks": [
+    {
+      "type": "testimonial",
+      "name": "Testimonial",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Profilbild"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "Sarah Müller"
+        },
+        {
+          "type": "text",
+          "id": "position",
+          "label": "Position",
+          "default": "Home Improvement Blogger"
+        },
+        {
+          "type": "textarea",
+          "id": "quote",
+          "label": "Zitat",
+          "default": "The Binford claw hammer is perfectly balanced. I’ve driven hundreds of nails without fatigue..."
+        }
+      ]
+    }
+  ],
+  "max_blocks": 10,
+  "presets": [
+    {
+      "name": "Testimonial Slider",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}
